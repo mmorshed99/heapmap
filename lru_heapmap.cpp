@@ -16,18 +16,49 @@ int current = 0;
 
 point* mru;
 point* lru;
-
-lruache::lrucache(int capacity){
-  Map.erase(Map.begin(),Map.end());
-  maximum = capacity;
-  current = 0;
-  mru = NULL;
-  lru = NULL;
+LRUCache::LRUCache(int capacity) {
+Map.erase(Map.begin(),Map.end());
+maximum = capacity;
+current = 0;
+mru = NULL;
+lru = NULL;
 }
 
-int lrucache::set(int key, int value){
-  if(Map.find(key) == Map.end()){
-    Map.insert(key,value);
+int LRUCache::get(int key) {
+    if(current > 0){
+      auto mykey = Map.find(key);
+      if(mykey != Map.end()){
+	int temp = mykey->second;
+	int value = mykey->first;
+	point* curr = mru;
+	while(curr->mypoint != value){
+	  curr = curr->nextpoint;
+	}
+	point* previous = curr->prevpoint;
+	point* next = curr->nextpoint;
+	if(previous != NULL){
+	  previous->nextpoint = next;
+	  if(next == NULL){
+	    lru = previous;
+	  }
+	  else{
+	    next->prevpoint = previous;
+	  }
+	  curr->nextpoint = mru;
+	  curr->prevpoint = NULL;
+	  mru->prevpoint = curr;
+	  mru = curr;
+	}
+	return temp;
+      }
+    }
+return -1;
+
+}
+
+void LRUCache::set(int key, int value) {
+if(Map.find(key) == Map.end()){
+    Map.insert({key,value});
     point* temp = new point(key);
     if(current != maximum){
       current++;
@@ -41,9 +72,10 @@ int lrucache::set(int key, int value){
 	temp->nextpoint = mru;
 	mru = temp;
       }
+    }
       else{ 
 	int old = lru->mypoint;
-	del_elem = Map.find(old);
+	auto del_elem = Map.find(old);
 	Map.erase(del_elem);
 	if(lru->prevpoint == NULL){
 	  lru = temp;
@@ -79,36 +111,5 @@ int lrucache::set(int key, int value){
 	mru->prevpoint = curr_point;
 	mru = curr_point;
       }
-    }
-  }
-
-  int lrucache::get(int key) {
-    if(current > 0){
-      mykey = Map.find(key);
-      if(mykey != Map.end()){
-	int temp = mykey->second;
-	int value = mykey->first;
-	point* curr = first;
-	while(curr->val != value){
-	  curr = curr->next;
-	}
-	Node* prvious = curr->prev;
-	Node* next = curr->next;
-	if(previous != NULL){
-	  previous->next = next;
-	  if(next == NULL){
-	    lru = previous;
-	  }
-	  else{
-	    next->previous = previous;
-	  }
-	  curr->nextpoint = first;
-	  curr->prevpoint = NULL;
-	  mru->prevpoint = curr;
-	  mru = curr;
-	}
-	return temp;
-      }
-    }
-    return -1;
-  }
+}
+}
